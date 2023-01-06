@@ -1,6 +1,7 @@
 import { LoaderFunction, redirect } from "@remix-run/node";
+import { createHeaders } from "~/session";
 import { SpotifyClient } from "~/spotify";
-import { createHeaders, createState } from "~/state";
+import { createState } from "~/state";
 
 const SCOPES = [
   'playlist-modify-private',
@@ -22,10 +23,7 @@ export const loader: LoaderFunction = async ({ request, context, params }) => {
     redirectUri: process.env.SPOTIFY_REDIRECT_URL as string,
   });
   const token = client.getAccessToken();
-  console.log({ token });
+  const headers = await createHeaders(token);
 
-  const profile = await client.getCurrentUsersProfile();
-  console.log({ profile });
-
-  return redirect('/', {});
+  return redirect('/', { headers });
 };

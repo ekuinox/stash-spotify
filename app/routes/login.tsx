@@ -21,7 +21,6 @@ export const loader: LoaderFunction = async ({ request, context }) => {
       redirectUri: process.env.SPOTIFY_REDIRECT_URL as string,
     }
   );
-  console.log({ url });
   const headers = await createHeaders(state);
   return redirect(url, { headers });
 };
