@@ -2,7 +2,7 @@ import { LoaderFunction, redirect } from "@remix-run/node";
 import { createHeaders, encryptToken, getSession } from "~/session";
 import { SpotifyClient } from "~/spotify";
 
-const redirectUrl = process.env.SPOTIFY_REDIRECT_URL ?? `https://${process.env.VERCEL_URL}`;
+const redirectUrl = process.env.SPOTIFY_REDIRECT_URL ?? `https://${process.env.VERCEL_URL}/callback`;
 
 export const loader: LoaderFunction = async ({ request, context, params }) => {
   const session = await getSession(request.headers);

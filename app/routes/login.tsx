@@ -13,7 +13,7 @@ const SCOPES = [
   'user-read-private',
   'user-read-email',
 ];
-const redirectUrl = process.env.SPOTIFY_REDIRECT_URL ?? `https://${process.env.VERCEL_URL}`;
+const redirectUrl = process.env.SPOTIFY_REDIRECT_URL ?? `https://${process.env.VERCEL_URL}/callback`;
 
 export const loader: LoaderFunction = async ({ request, context }) => {
   const session = await getSession(request.headers);
