@@ -13,9 +13,9 @@ const SCOPES = [
 ];
 
 export const loader: LoaderFunction = async ({ request, context }) => {
-  const state = createState();
   const session = await getSession(request.headers);
-  const headers = await createHeaders({ state: session?.state ?? state });
+  const state = session?.state ?? createState();
+  const headers = await createHeaders({ state });
   const url = SpotifyClient.generateAuthorizeUri(
     state,
     SCOPES,
