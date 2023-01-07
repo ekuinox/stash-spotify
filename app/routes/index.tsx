@@ -1,7 +1,7 @@
 import { LoaderFunction } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import { json } from "@remix-run/server-runtime";
-import { createHeaders, getSession } from "~/session";
+import { createHeaders, decryptToken, getSession } from "~/session";
 import { SpotifyClient } from "~/spotify";
 
 interface LoaderProps {
@@ -17,7 +17,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   if (token == null) {
     return json<LoaderProps>({ username: null }, { headers: await createHeaders() });
   }
-  const client = new SpotifyClient(token, '');
+  const client = new SpotifyClient(decryptToken(token), '');
   const profile = await client.getCurrentUsersProfile();
   return json<LoaderProps>({ username: profile.displayName });
 };

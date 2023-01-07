@@ -1,5 +1,5 @@
 import { LoaderFunction, redirect } from "@remix-run/node";
-import { createHeaders, getSession } from "~/session";
+import { createHeaders, encryptToken, getSession } from "~/session";
 import { SpotifyClient } from "~/spotify";
 
 export const loader: LoaderFunction = async ({ request, context, params }) => {
@@ -26,7 +26,10 @@ export const loader: LoaderFunction = async ({ request, context, params }) => {
     redirectUri: process.env.SPOTIFY_REDIRECT_URL as string,
   });
   const token = client.getAccessToken();
-  const headers = await createHeaders({ token, state: session.state });
+  const headers = await createHeaders({
+    token: encryptToken(token),
+    state: session.state,
+  });
 
   return redirect('/', { headers });
 };
