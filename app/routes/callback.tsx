@@ -3,13 +3,6 @@ import { createHeaders } from "~/session";
 import { SpotifyClient } from "~/spotify";
 import { createState } from "~/state";
 
-const SCOPES = [
-  'playlist-modify-private',
-  'user-library-modify',
-  'user-library-read',
-  'user-modify-playback-state',
-];
-
 export const loader: LoaderFunction = async ({ request, context, params }) => {
   const url = new URL(request.url);
   const code = url.searchParams.get('code');
