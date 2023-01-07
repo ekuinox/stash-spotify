@@ -3,9 +3,12 @@ import { createHeaders, getSession, createState } from "~/session";
 import { SpotifyClient } from "~/spotify";
 
 const SCOPES = [
+  'playlist-modify-public',
+  'playlist-read-private',
   'playlist-modify-private',
   'user-library-modify',
   'user-library-read',
+  'user-read-playback-state',
   'user-modify-playback-state',
   'user-read-private',
   'user-read-email',

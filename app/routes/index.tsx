@@ -1,5 +1,5 @@
 import { LoaderFunction } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
+import { Form, Link, useLoaderData } from "@remix-run/react";
 import { json } from "@remix-run/server-runtime";
 import { createHeaders, decryptToken, getSession } from "~/session";
 import { SpotifyClient } from "~/spotify";
@@ -19,6 +19,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   }
   const client = new SpotifyClient(decryptToken(token), '');
   const profile = await client.getCurrentUsersProfile();
+
   return json<LoaderProps>({ username: profile.displayName });
 };
 
@@ -27,7 +28,12 @@ const Index = () => {
   return (
     <div>
       {username && (
-        <p>こんにちは {username}</p>
+        <>
+          <p>こんにちは {username}</p>
+          <Form action='/stash' method="post">
+            <button type="submit">Create Stash</button>
+          </Form>
+        </>
       ) || (
           <Link to='/login'>Login</Link>
         )}
