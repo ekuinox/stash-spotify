@@ -56,3 +56,11 @@ export const getSession = async (headers: Headers): Promise<z.infer<typeof schem
   }
   return r.data;
 };
+
+export const getToken = async (headers: Headers): Promise<string | null> => {
+  const session = await getSession(headers);
+  if (session == null) {
+    return null;
+  }
+  return session.token;
+};

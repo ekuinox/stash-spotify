@@ -28,7 +28,7 @@ const getDateTimeFromPlaylistName = (name: string): Date | null => {
 export const createStash = async (client: SpotifyClient, includePlaying: boolean = true): Promise<Stash | Error> => {
   try {
     const { queue, currentlyPlaying } = await client.getQueue();
-    const tracks = includePlaying ? [...queue, currentlyPlaying] : queue;
+    const tracks = (includePlaying && currentlyPlaying != null) ? [...queue, currentlyPlaying] : queue;
     const user = await client.userClient();
     const { id } = await user.createPlaylist(createNewPlaylistName());
     await user.putPlaylistItems(id, tracks.map((track) => track.uri));

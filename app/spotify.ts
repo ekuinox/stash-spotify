@@ -38,7 +38,7 @@ const getCurrentlyPlayingTrackResponseType = z.object({
 }));
 
 const getQueueResponseType = z.object({
-  currently_playing: trackType,
+  currently_playing: trackType.nullable(),
   queue: z.array(trackType),
 }).transform(({ currently_playing, ...rest }) => ({
   currentlyPlaying: currently_playing,
@@ -204,29 +204,33 @@ export class SpotifyClient {
   };
 
   userClient = async (): Promise<SpotifyUserClient> => {
-    const { id } = await this.getCurrentUsersProfile();
-    return new SpotifyUserClient(this, id);
+    const user = await this.getCurrentUsersProfile();
+    return new SpotifyUserClient(this, user);
   };
 }
 
 class SpotifyUserClient {
   #client: SpotifyClient;
-  #userId: string;
+  #user: z.infer<typeof getCurrentUsersProfileResponseType>;
 
-  constructor(client: SpotifyClient, userId: string) {
+  constructor(client: SpotifyClient, user: z.infer<typeof getCurrentUsersProfileResponseType>) {
     this.#client = client;
-    this.#userId = userId;
+    this.#user = user;
   }
 
+  getUser = () => {
+    return this.#user;
+  };
+
   createPlaylist = async (name: string, isPublic: boolean = false): Promise<z.infer<typeof createPlaylistResponseType>> => {
-    return this.#client.post(`/users/${this.#userId}/playlists`, {}, JSON.stringify({
+    return this.#client.post(`/users/${this.#user.id}/playlists`, {}, JSON.stringify({
       name,
       public: false,
     })).then(SpotifyClient.asJson(createPlaylistResponseType));
   };
 
   putPlaylistItems = async (id: string, uris: string[]): Promise<void> => {
-    return this.#client.put(`/users/${this.#userId}/playlists/${id}/tracks`, { uris: uris.join(',') }).then((r) => {
+    return this.#client.put(`/users/${this.#user.id}/playlists/${id}/tracks`, { uris: uris.join(',') }).then((r) => {
       if (!r.ok) {
         return Promise.reject();
       }
@@ -234,12 +238,12 @@ class SpotifyUserClient {
   };
 
   getPlaylists = async (limit: number = 50, offset: number = 0): Promise<z.infer<typeof getPlaylistsResponseType>> => {
-    return this.#client.get(`/users/${this.#userId}/playlists`)
+    return this.#client.get(`/users/${this.#user.id}/playlists`)
       .then(SpotifyClient.asJson(getPlaylistsResponseType));
   };
 
   getPlaylistTracks = async (playlistId: string, limit: number = 50, offset: number = 0): Promise<z.infer<typeof getPlaylistsResponseType>> => {
-    return this.#client.get(`/users/${this.#userId}/playlists/${playlistId}/tracks`)
+    return this.#client.get(`/users/${this.#user.id}/playlists/${playlistId}/tracks`)
       .then(SpotifyClient.asJson(getPlaylistsResponseType));
   };
 }

@@ -1,42 +1,80 @@
 import { LoaderFunction } from "@remix-run/node";
 import { Form, Link, useLoaderData } from "@remix-run/react";
 import { json } from "@remix-run/server-runtime";
-import { createHeaders, decryptToken, getSession } from "~/session";
+import { createHeaders, decryptToken, getToken } from "~/session";
 import { SpotifyClient } from "~/spotify";
 
-interface LoaderProps {
-  username: string | null;
+interface PlayerState {
+  playing: {
+    id: string;
+    uri: string;
+    name: string;
+  } | null;
+  queue: {
+    id: string;
+    uri: string;
+    name: string;
+  }[];
+  username: string;
+  stashes: {
+    id: string;
+    name: string;
+  }[];
 }
 
-export const loader: LoaderFunction = async ({ request }) => {
-  const session = await getSession(request.headers);
-  if (session == null) {
-    return json<LoaderProps>({ username: null }, { headers: await createHeaders() });
-  }
-  const { token } = session;
+interface LoaderProps {
+  state: PlayerState | null;
+}
+
+const getState = async (headers: Headers): Promise<PlayerState | null> => {
+  const token = await getToken(headers);
   if (token == null) {
-    return json<LoaderProps>({ username: null }, { headers: await createHeaders() });
+    return null;
   }
   const client = new SpotifyClient(decryptToken(token), '');
-  const profile = await client.getCurrentUsersProfile();
+  const user = await client.userClient();
+  const { displayName: username, id } = user.getUser();
+  console.log({ username, id });
+  const { queue, currentlyPlaying } = await client.getQueue();
+  console.log({ queue });
+  return {
+    playing: currentlyPlaying,
+    queue,
+    username,
+    stashes: [],
+  };
+};
 
-  return json<LoaderProps>({ username: profile.displayName });
+export const loader: LoaderFunction = async ({ request }) => {
+  const state = await getState(request.headers);
+
+  return json<LoaderProps>({ state }, state == null ? { headers: await createHeaders() } : {});
 };
 
 const Index = () => {
-  const { username } = useLoaderData<LoaderProps>();
+  const { state } = useLoaderData<LoaderProps>();
+
+  if (state == null) {
+    return (
+      <Link to='/login'>Login</Link>
+    );
+  }
+
+  const { queue, playing, stashes, username } = state;
+
   return (
     <div>
-      {username && (
-        <>
-          <p>こんにちは {username}</p>
-          <Form action='/stash' method="post">
-            <button type="submit">Create Stash</button>
-          </Form>
-        </>
-      ) || (
-          <Link to='/login'>Login</Link>
-        )}
+      <dl>
+        <dt>username</dt>
+        <dd>{username}</dd>
+        <dt>再生中</dt>
+        <dd>{playing?.name ?? '停止中'}</dd>
+      </dl>
+      <ol>
+        {queue.map((queue) => (
+          <li>{queue.name}</li>
+        ))}
+      </ol>
     </div>
   );
 };
