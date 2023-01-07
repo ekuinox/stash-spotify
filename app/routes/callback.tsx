@@ -1,12 +1,22 @@
 import { LoaderFunction, redirect } from "@remix-run/node";
-import { createHeaders } from "~/session";
+import { createHeaders, getSession } from "~/session";
 import { SpotifyClient } from "~/spotify";
-import { createState } from "~/state";
 
 export const loader: LoaderFunction = async ({ request, context, params }) => {
+  const session = await getSession(request.headers);
+  if (session == null) {
+    console.error('session null');
+    return redirect('/');
+  }
   const url = new URL(request.url);
   const code = url.searchParams.get('code');
   if (code == null) {
+    console.error('code null');
+    return redirect('/');
+  }
+  const state = url.searchParams.get('state');
+  if (state !== session.state) {
+    console.error('state incorrect or null');
     return redirect('/');
   }
 
@@ -16,7 +26,7 @@ export const loader: LoaderFunction = async ({ request, context, params }) => {
     redirectUri: process.env.SPOTIFY_REDIRECT_URL as string,
   });
   const token = client.getAccessToken();
-  const headers = await createHeaders(token);
+  const headers = await createHeaders({ token, state: session.state });
 
   return redirect('/', { headers });
 };

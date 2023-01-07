@@ -1,32 +1,41 @@
 import { createCookie } from "@remix-run/node";
 import * as z from 'zod';
+import { createState } from "./state";
 
 const userSession = createCookie('user-session');
 
 const schema = z.object({
-  token: z.string(),
+  token: z.string().nullable(),
+  state: z.string(),
 });
 
-const encryptToken = (token: string): string => {
+export const encryptToken = (token: string): string => {
   // TODO
   return token;
 };
 
-const decryptToken = (token: string): string => {
+export const decryptToken = (token: string): string => {
   // TODO
   return token;
-}
+};
 
-export const createHeaders = async (token: string): Promise<HeadersInit> => {
+export const createHeaders = async ({
+  state,
+  token,
+}: {
+  state?: string;
+  token?: string;
+} = {}): Promise<HeadersInit> => {
   const session: z.infer<typeof schema> = {
-    token: encryptToken(token),
+    token: token ?? null,
+    state: state ?? createState(),
   };
   return {
     'set-cookie': await userSession.serialize(session),
   };
 };
 
-export const getToken = async (headers: Headers): Promise<string | null> => {
+export const getSession = async (headers: Headers): Promise<z.infer<typeof schema> | null> => {
   const cookieHeader = headers.get('cookie');
   if (cookieHeader == null) {
     return null;
@@ -36,5 +45,5 @@ export const getToken = async (headers: Headers): Promise<string | null> => {
   if (!r.success) {
     return null;
   }
-  return decryptToken(r.data.token);
+  return r.data;
 };
