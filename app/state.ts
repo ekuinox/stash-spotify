@@ -7,13 +7,14 @@ const schema = z.object({
   state: z.string(),
 });
 
-export const createState = () => {
-  // TODO
-  return "Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-  const buffer = new Uint8Array(64);
-  const randomBytes = crypto.getRandomValues(buffer);
-  const token = Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
-  return token;
+export const createState = (length: number = 64) => {
+  let result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
 };
 
 export const createHeaders = async (state: string): Promise<HeadersInit> => {
