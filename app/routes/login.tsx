@@ -1,7 +1,6 @@
 import { LoaderFunction, redirect } from "@remix-run/node";
-import { createHeaders, getSession } from "~/session";
+import { createHeaders, getSession, createState } from "~/session";
 import { SpotifyClient } from "~/spotify";
-import { createState } from "~/state";
 
 const SCOPES = [
   'playlist-modify-private',

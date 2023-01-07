@@ -1,6 +1,5 @@
 import { createCookie } from "@remix-run/node";
 import * as z from 'zod';
-import { createState } from "./state";
 
 const userSession = createCookie('user-session');
 
@@ -17,6 +16,16 @@ export const encryptToken = (token: string): string => {
 export const decryptToken = (token: string): string => {
   // TODO
   return token;
+};
+
+export const createState = (length: number = 64) => {
+  let result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
 };
 
 export const createHeaders = async ({
