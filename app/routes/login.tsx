@@ -13,6 +13,7 @@ const SCOPES = [
   'user-read-private',
   'user-read-email',
 ];
+const redirectUrl = process.env.VERCEL_URL != null ? `https://${process.env.VERCEL_URL}` : process.env.SPOTIFY_REDIRECT_URL as string
 
 export const loader: LoaderFunction = async ({ request, context }) => {
   const session = await getSession(request.headers);
@@ -23,7 +24,7 @@ export const loader: LoaderFunction = async ({ request, context }) => {
     SCOPES,
     {
       clientId: process.env.SPOTIFY_CLIENT_ID as string,
-      redirectUri: process.env.SPOTIFY_REDIRECT_URL as string,
+      redirectUri: redirectUrl,
     }
   );
   return redirect(url, { headers });
